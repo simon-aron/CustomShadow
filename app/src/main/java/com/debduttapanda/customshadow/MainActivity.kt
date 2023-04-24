@@ -15,11 +15,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ExperimentalGraphicsApi
-import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -60,13 +58,17 @@ class MainActivity : ComponentActivity() {
                     val shadowColor = remember {
                         mutableStateOf(Color.Black)
                     }
+                    val rotation = remember {
+                        mutableStateOf(0f)
+                    }
                     Column(
                         modifier = Modifier
-                    ){
+                    ) {
                         Box(
                             modifier = Modifier
                                 .padding(40.dp)
-                                .shadow(
+                                .rotate(rotation.value)
+                                .shadow( //Custom shadow
                                     shadowColor.value,
                                     borderRadius = shadowBorderRadius.value.dp,
                                     offsetX = offsetX.value.dp,
@@ -74,22 +76,30 @@ class MainActivity : ComponentActivity() {
                                     spread = spread.value.dp,
                                     blurRadius = blurRadius.value.dp
                                 )
+//                                .shadow( // Compose shadow
+//                                    elevation = shadowBorderRadius.value.dp,
+//                                    shape = RectangleShape,
+//                                    clip = shadowBorderRadius.value.dp > 0.dp,
+//                                    ambientColor = DefaultShadowColor,
+//                                    spotColor = DefaultShadowColor,
+//                                )
+//                                .rotate(rotation.value) // Wrong rotate position
                                 .fillMaxWidth()
                                 .height(height.value.dp)
                                 .clip(RoundedCornerShape(radius.value.dp))
                                 .background(Color.White)
-                        ){
+                        ) {
 
                         }
                         LazyColumn(
                             modifier = Modifier
                                 .padding(50.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ){
+                        ) {
                             stickyHeader {
                                 MyHeader("Geometry")
                             }
-                            item{
+                            item {
                                 MySlider(
                                     title = "Width",
                                     from = 0f,
@@ -97,7 +107,7 @@ class MainActivity : ComponentActivity() {
                                     value = height
                                 )
                             }
-                            item{
+                            item {
                                 MySlider(
                                     title = "Radius",
                                     from = 0f,
@@ -105,10 +115,18 @@ class MainActivity : ComponentActivity() {
                                     value = radius
                                 )
                             }
+                            item {
+                                MySlider(
+                                    title = "Rotation",
+                                    from = 0f,
+                                    to = 360f,
+                                    value = rotation
+                                )
+                            }
                             stickyHeader {
                                 MyHeader("Shadow")
                             }
-                            item{
+                            item {
                                 MySlider(
                                     title = "Radius",
                                     from = 0f,
@@ -116,7 +134,7 @@ class MainActivity : ComponentActivity() {
                                     value = shadowBorderRadius
                                 )
                             }
-                            item{
+                            item {
                                 MySlider(
                                     title = "OffsetX",
                                     from = 0f,
@@ -124,7 +142,7 @@ class MainActivity : ComponentActivity() {
                                     value = offsetX
                                 )
                             }
-                            item{
+                            item {
                                 MySlider(
                                     title = "OffsetY",
                                     from = 0f,
@@ -132,7 +150,7 @@ class MainActivity : ComponentActivity() {
                                     value = offsetY
                                 )
                             }
-                            item{
+                            item {
                                 MySlider(
                                     title = "Spread",
                                     from = 0f,
@@ -140,7 +158,7 @@ class MainActivity : ComponentActivity() {
                                     value = spread
                                 )
                             }
-                            item{
+                            item {
                                 MySlider(
                                     title = "Blur Radius",
                                     from = 0f,
@@ -151,8 +169,8 @@ class MainActivity : ComponentActivity() {
                             stickyHeader {
                                 MyHeader("Shadow Color")
                             }
-                            item{
-                                ColorPicker{
+                            item {
+                                ColorPicker {
                                     shadowColor.value = it
                                 }
                             }
@@ -167,8 +185,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyHeader(
     title: String
-){
-    Column(){
+) {
+    Column() {
         Text(
             title,
             fontWeight = FontWeight.Black,
@@ -185,8 +203,8 @@ fun MyHeader(
 @OptIn(ExperimentalGraphicsApi::class)
 @Composable
 fun ColorPicker(
-    onColorChange: (Color)->Unit
-){
+    onColorChange: (Color) -> Unit
+) {
     val hue = remember {
         mutableStateOf(0f)
     }
@@ -201,14 +219,14 @@ fun ColorPicker(
     }
     val color = remember {
         derivedStateOf {
-            val c = Color.hsv(hue.value,sat.value,value.value,alpha.value)
+            val c = Color.hsv(hue.value, sat.value, value.value, alpha.value)
             onColorChange(c)
             c
         }
     }
     Column(
         modifier = Modifier.fillMaxWidth()
-    ){
+    ) {
 
     }
     Box(
@@ -229,11 +247,11 @@ fun MySlider(
     from: Float = 0f,
     to: Float = 1f,
     value: MutableState<Float>
-){
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-    ){
+    ) {
         Text("$title:${value.value}")
         Slider(
             value = value.value,
